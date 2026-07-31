@@ -22,7 +22,7 @@ jobs:
           set -euo pipefail
           cat migration-payload/part-* > /tmp/vhe-update16.b64
           base64 --decode /tmp/vhe-update16.b64 > /tmp/vhe-update16.tar.xz
-          echo "b814472d43a7fc2fd21e988c93bb6d85e4a81559e6e0576e6e85b50f35243f08  /tmp/vhe-update16.tar.xz" | sha256sum -c -
+          echo "4eccb07bc0633923947d6b43501609698905c0ef457173d6705c0281ac916118  /tmp/vhe-update16.tar.xz" | sha256sum -c -
           xz -t /tmp/vhe-update16.tar.xz
 
       - name: Import authoritative Update 16 tree
