@@ -1,0 +1,59 @@
+name: Import authoritative VHE Update 16
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'migration-inbox/*.zip'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact migration archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP='migration-inbox/VHE-Progress-update 16_2026-07-27.zip'
+          test -f "$ZIP"
+          echo '9745687699c23f3e7e1c827e756bd13816ec04ec6758f28694431ab6faecb215  migration-inbox/VHE-Progress-update 16_2026-07-27.zip' | sha256sum -c -
+
+      - name: Extract and verify package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/vhe-update16
+          mkdir -p /tmp/vhe-update16
+          unzip -q 'migration-inbox/VHE-Progress-update 16_2026-07-27.zip' -d /tmp/vhe-update16
+          COUNT=$(find /tmp/vhe-update16 -type f | wc -l | tr -d ' ')
+          test "$COUNT" = '168'
+          test -f /tmp/vhe-update16/PACKAGE-PROVENANCE.md
+          test -f /tmp/vhe-update16/_LOGS/STATUS-HANDOFF/CURRENT-STATUS.md
+          test -f /tmp/vhe-update16/_LOGS/STATUS-HANDOFF/START-HERE_NEW-ROOM_2026-07-27.md
+          test -f /tmp/vhe-update16/package.json
+
+      - name: Import Update 16 into repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          rsync -a --exclude='.git/' /tmp/vhe-update16/ ./
+          rm -rf migration-inbox
+          rm -f .github/workflows/import-update16.yml
+
+      - name: Commit authoritative baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Eli Soren'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Import authoritative VHE Update 16 baseline — Eli Soren'
+          git push origin HEAD:main
