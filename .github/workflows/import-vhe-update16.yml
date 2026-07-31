@@ -1,0 +1,48 @@
+name: Import VHE Update 16 baseline
+
+on:
+  push:
+    paths:
+      - 'migration-payload/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reassemble and verify payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat migration-payload/part-* > /tmp/vhe-update16.b64
+          base64 --decode /tmp/vhe-update16.b64 > /tmp/vhe-update16.tar.xz
+          echo "b814472d43a7fc2fd21e988c93bb6d85e4a81559e6e0576e6e85b50f35243f08  /tmp/vhe-update16.tar.xz" | sha256sum -c -
+          xz -t /tmp/vhe-update16.tar.xz
+
+      - name: Import authoritative Update 16 tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -xJf /tmp/vhe-update16.tar.xz -C .
+          rm -rf migration-payload
+          rm -f .github/workflows/import-vhe-update16.yml
+
+      - name: Commit imported baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Eli Soren"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No import changes detected."
+            exit 0
+          fi
+          git commit -m "Import authoritative VHE Update 16 baseline — Eli Soren"
+          git push origin HEAD:migration/update16
