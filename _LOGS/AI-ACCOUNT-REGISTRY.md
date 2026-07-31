@@ -13,6 +13,7 @@ an identifier. Do not invent one, and do not reuse another account's.**
 | `CC-SONNET-01` | Claude Sonnet 5 — elisoren428@gmail.com (Pro) | Claude Code — Desktop app, Windows 11. Room: "Video Hallucination Editor 7-19-2026" | Self-registered 2026-07-20 under the owner's 2026-07-19 identifier-handling delegation (same account as `CC-OPUS-01`/`CC-FABLE-01`, different model ⇒ new identifier per convention) | 2026-07-20 |
 | `CC-HAIKU-01` | Claude Haiku 4.5 — elisoren428@gmail.com (Pro) | Claude Code — Desktop app, Windows 11. Room: "Video Hallucination Editor 7-19-2026" | Self-registered 2026-07-21 under the owner's 2026-07-19 identifier-handling delegation (same account as the other `CC-*` rows, different model ⇒ new identifier per convention) | 2026-07-21 |
 | `CODEX-SOL-01` | Codex Sol | Codex — Desktop app, Windows 11. Room: "Video Hallucination Editor 7-19-2026" | Owner-assigned 2026-07-22; use the Codex Sol signature so cross-platform handoffs clearly identify authorship | 2026-07-22 |
+| `GPT-5-01` | GPT-5.6 Thinking · signature **Eli Soren** | ChatGPT Web · GitHub build lane · project `505ccreate/VHE` | ✅ Owner assigned the working signature **Eli Soren** on 2026-07-31; identifier registered under the existing project convention and 2026-07-19 identifier-handling delegation | 2026-07-31 |
 
 > **Model-version note (2026-07-24, `CC-OPUS-01`) — RESOLVED.** On 2026-07-24 the owner switched this
 > room to **Claude Opus 5** mid-session (`/model claude-opus-5`), and round-7 of `VHE-ISSUE-LOG-0033`
