@@ -1,0 +1,23 @@
+{
+  "note": "TEMPORARY synthetic plumbing fixtures; NOT the frozen §1 fixtures. See README.md.",
+  "fixtures": {
+    "bad_hand.png": {
+      "mask": {
+        "x": 0.55,
+        "y": 0.24,
+        "w": 0.24,
+        "h": 0.4
+      },
+      "featherPx": 16
+    },
+    "garbled_text.png": {
+      "mask": {
+        "x": 0.52,
+        "y": 0.4,
+        "w": 0.37,
+        "h": 0.2
+      },
+      "featherPx": 14
+    }
+  }
+}

@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+*.tsbuildinfo
+
+# Environment / secrets
+# The owner keeps API keys in a central library — keys never enter this repo (VHE-ISSUE-LOG-0006).
+.env
+.env.*
+!.env.example
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Owner-staged tools library — 37k files, ~904 MB, staged not installed.
+# NEVER scan this recursively. See VHE-ISSUE-LOG-0006.
+library/
+
+# Vendored FFmpeg binaries — ~175 MB.
+# DECIDED by owner 2026-07-19 (VHE-ISSUE-LOG-0010 appended): binaries stay OUT of
+# git permanently; identity is verified by pinned SHA-256 in scripts/preflight.ts
+# against the library staged copy. The LICENSE is tracked; the .exe files are not.
+vendor/ffmpeg/*.exe
+
+# Test fixtures ARE committed (VHE-ISSUE-LOG-0011): they must be frozen and
+# byte-identical across rooms; checksums live in fixtures/CHECKSUMS.sha256.
+
+# TEMPORARY provider-validation OUTPUTS — paid provider result images, non-deterministic and
+# regenerable via scripts/validate-provider-inpaint.ts. The synthetic fixture SOURCES + README
+# + manifest ARE tracked (reproducible test inputs); only the rendered out/ is ignored. These
+# are NOT the frozen §1 fixtures and never satisfy the preflight gate. See VHE-ISSUE-LOG-0022.
+fixtures/_TEMP-provider-validation/out/
+
+# Owner-communication artifact — plain-English explainer zip generated 2026-07-20 for
+# the owner to share with "Eli"/ChatGPT. Regenerable; not project source. Contents (the
+# logs it bundles) are already tracked. Kept out of git to avoid clutter.
+VHE-EXPLAIN-FOR-ELI_*.zip
+
+# Review packages generated for Eli/ChatGPT (e.g. the §7 review zip). Regenerable from
+# git + logs; not project source. Kept out of git so the tree stays clean after building.
+VHE-SECTION-*-ELI-REVIEW_*.zip
+
+# Progress-snapshot package (README + a curated subset of engineering-logs) for the owner
+# to share. Same class as the two above: regenerable, its contents are already tracked,
+# not project source. Kept out of git so a binary blob never lands in history.
+VHE-progaress sofar_*.zip
+VHE-progress sofar_*.zip
+
+# Full project backups (git archive HEAD of all tracked files). Regenerable by definition
+# from git itself; never needs to be a commit inside the history it's backing up.
+VHE-BACKUP-FULL_*.zip
+
+# Full context package for the AI review panels (README + all logs + source + blueprint
+# mirror + validation evidence + the new source addon). Regenerable; not project source.
+VHE-CONTEXT-FOR-ELI_*.zip
+
+# OWNER RULING 2026-07-23 (VHE-ISSUE-LOG, CURRENT-STATUS): all zip patterns above now get
+# written directly to C:\Users\user\Documents\VHE Backups\, not this project root, to keep
+# the project folder clutter-free. These gitignore lines still apply if one is ever built
+# here by mistake. Keep only the LATEST VHE-CONTEXT-FOR-ELI_*.zip in VHE Backups\ — delete
+# the prior one when a new one is generated.

@@ -1,0 +1,4 @@
+allowBuilds:
+  # bullmq -> msgpackr optional native accelerator; prebuilt binary install script.
+  # Approved under owner delegation 2026-07-19 (see VHE-ISSUE-LOG-0011).
+  msgpackr-extract: true
