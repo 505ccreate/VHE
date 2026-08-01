@@ -14,6 +14,17 @@ system exists so no builder ever has to assume, guess, drift, or re-derive conte
 4. Only the `_LOGS/ISSUE-RESOLUTION-LOG/` entries the handoff names. Use `_LOGS/LOG-INDEX.md` to find
    a specific one. **Do not read the whole library.**
 
+## AI review / consultation assignments
+
+If Ashley sent you here to **review, audit, consult, inspect, or grade another AI's work**, do not begin
+implementation and do not improvise an assignment from CURRENT-STATUS. Open:
+
+1. `_LOGS/AI-REVIEW-JOBS/README.md` — permanent reviewer rules and verdict protocol
+2. The file beginning with `_LOGS/AI-REVIEW-JOBS/ACTIVE-` — the current exact assignment
+
+The active assignment controls the review scope, required source seams, prohibitions, signature, and output
+format. The author of the material under review cannot self-certify the assignment as independent.
+
 ## Source of truth
 
 `VHE-1` (vision) · `VHE-2` (execution plan, §0–§17) · `VHE-3` (pre-flight checklist) ·
