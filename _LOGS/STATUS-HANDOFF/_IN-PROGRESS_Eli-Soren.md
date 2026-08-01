@@ -43,4 +43,10 @@ Do not infer completion from partial files or commit messages. Verify the actual
 
 [2026-08-01 09:12 EDT] Selected the Round-15 correction shape before drafting: (1) guard every worker-owned `jobs` write with the frozen claim-time `attempt`; (2) use a separate Postgres `job_execution_outbox` so `execute` remains outside `job_wakeup_outbox` as Round 12 requires; (3) each funded continuation becomes a fresh queued execution whose winning §4 claim increments `jobs.attempt`, structurally limiting one routing attempt to one execution attempt; (4) carry charge events through success and typed exhaustion using a discriminated charge-state union; (5) add the missing crash, zombie-write, continuation-ordinal, and all-candidates-failed tests. This is specification work only and remains subject to independent review.
 
+[2026-08-01 09:18 EDT] Imported Marcus’s intent and verdict byte-for-byte into GitHub after verifying both individual hashes and the transport archive hash. Import commit: `8c7fe32534d87bbb9d0db959f714fcc199f51a85`. Temporary transport workflow/payload removed itself.
+
+[2026-08-01 09:22 EDT] Appended Round 15 to `VHE-ISSUE-LOG-0033`. The workflow required the exact Round-14 blob SHA, verified the Round-15 payload SHA-256, confirmed the complete pre-append file remained an exact byte-prefix, and confirmed exactly 214 lines were appended. Append commit: `a08f02d1561b43d76c9a1d23fce0f61be5db3371`. No prior append, base specification, source, test, migration, or blueprint was rewritten.
+
+[2026-08-01 09:24 EDT] Entered closing-bookkeeping phase. Next actions: close REVIEW-001, open REVIEW-002 for Round 15, update `LOG-INDEX.md`, write handoff 48, update `CURRENT-STATUS.md`, verify the resulting files, then delete this in-progress log.
+
 — **Eli Soren (`GPT-5-01`)**
