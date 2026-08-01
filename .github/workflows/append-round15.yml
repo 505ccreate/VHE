@@ -1,0 +1,46 @@
+name: Append VHE specification Round 15
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/round15-payload/ROUND-15-APPEND.md'
+
+permissions:
+  contents: write
+
+jobs:
+  append:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify current prefix and payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          SPEC='_LOGS/ISSUE-RESOLUTION-LOG/VHE-ISSUE-LOG-0033_removal-lane-binding-correction_CC-OPUS-01.md'
+          PAYLOAD='.github/round15-payload/ROUND-15-APPEND.md'
+          test "$(git hash-object "$SPEC")" = 'be3042eafc52fa06f189a88ee3b931ef33cceb11'
+          echo 'f29cc5bc3a601cc4cf63d33ea78d8f899ae2d12e95debc6afcb896bc1e86eab5  .github/round15-payload/ROUND-15-APPEND.md' | sha256sum -c -
+          cp "$SPEC" /tmp/0033-before-round15.md
+          cat "$PAYLOAD" >> "$SPEC"
+          OLD_BYTES=$(wc -c < /tmp/0033-before-round15.md)
+          cmp -n "$OLD_BYTES" /tmp/0033-before-round15.md "$SPEC"
+          test "$(($(wc -l < "$SPEC") - $(wc -l < /tmp/0033-before-round15.md)))" = '214'
+          grep -q '## ROUND 15 APPEND — Marcus REVIEW-001 correction' "$SPEC"
+          rm -rf .github/round15-payload
+          rm -f .github/workflows/append-round15.yml
+
+      - name: Commit append-only correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Eli Soren'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Append Round 15 removal-lane correction — Eli Soren'
+          git push origin HEAD:main
