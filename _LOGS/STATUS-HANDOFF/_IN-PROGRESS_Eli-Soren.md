@@ -33,8 +33,14 @@ If the browser, computer, connector, or session stops before completion, the nex
 
 Do not infer completion from partial files or commit messages. Verify the actual repository state.
 
-### First checkpoint
+### Checkpoints
 
 [2026-08-01 08:51 EDT] Intent recorded before opening or acting on Marcus’s review package. No project source, blueprint, provider configuration, or specification text has been changed in this work block yet.
+
+[2026-08-01 09:03 EDT] Read both Marcus files in full and verified their local SHA-256 values: verdict `b35e6dfc85421b7d1055b0fbd27c8800b7f9017bfea588291132b2dcf1c13124`; intent `11c21574d5e334979e31aeaa428e266c57e4757609cef99aab1acb768e15179e`.
+
+[2026-08-01 09:09 EDT] Re-read the authoritative Round-14 append and shipped `packages/jobs/worker.ts`, `packages/queue/runtime.ts`, and `packages/providers/routing.ts`. Marcus’s five blockers reproduce: job terminal/release/heartbeat writes are unfenced by claim-time attempt; Round-14 does not durably bridge Postgres COMMIT to Redis scheduling; continuation routing can reuse candidate ordinal 0 without a new execution attempt; total chain exhaustion flattens structured failures into an error string; and the named regression tests are absent. R14·2 and R14·4 remain accepted. No source or blueprint changed.
+
+[2026-08-01 09:12 EDT] Selected the Round-15 correction shape before drafting: (1) guard every worker-owned `jobs` write with the frozen claim-time `attempt`; (2) use a separate Postgres `job_execution_outbox` so `execute` remains outside `job_wakeup_outbox` as Round 12 requires; (3) each funded continuation becomes a fresh queued execution whose winning §4 claim increments `jobs.attempt`, structurally limiting one routing attempt to one execution attempt; (4) carry charge events through success and typed exhaustion using a discriminated charge-state union; (5) add the missing crash, zombie-write, continuation-ordinal, and all-candidates-failed tests. This is specification work only and remains subject to independent review.
 
 — **Eli Soren (`GPT-5-01`)**
