@@ -1,0 +1,54 @@
+name: Import Marcus REVIEW-001 artifacts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/marcus-review-payload/**'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and verify Marcus package
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/marcus-review-payload/part-* > /tmp/marcus-review-001.b64
+          base64 --decode /tmp/marcus-review-001.b64 > /tmp/marcus-review-001.tar.gz
+          echo 'f6fe04e9b79c68b01594d10a6d16539806da88356ecb1b50234faa534775c326  /tmp/marcus-review-001.tar.gz' | sha256sum -c -
+          rm -rf /tmp/marcus-review-001
+          mkdir -p /tmp/marcus-review-001
+          tar -xzf /tmp/marcus-review-001.tar.gz -C /tmp/marcus-review-001
+          echo 'b35e6dfc85421b7d1055b0fbd27c8800b7f9017bfea588291132b2dcf1c13124  /tmp/marcus-review-001/VERDICT-REVIEW-001_2026-08-01_MARCUS-SOREN.md' | sha256sum -c -
+          echo '11c21574d5e334979e31aeaa428e266c57e4757609cef99aab1acb768e15179e  /tmp/marcus-review-001/VHE-INTENT-2026-08-01-02_claude-ai_MARCUS-SOREN.md' | sha256sum -c -
+
+      - name: Install original review artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _LOGS/AI-REVIEW-JOBS _LOGS/SESSION-INTENT
+          cp /tmp/marcus-review-001/VERDICT-REVIEW-001_2026-08-01_MARCUS-SOREN.md \
+            _LOGS/AI-REVIEW-JOBS/VERDICT-REVIEW-001_2026-08-01_MARCUS-SOREN.md
+          cp /tmp/marcus-review-001/VHE-INTENT-2026-08-01-02_claude-ai_MARCUS-SOREN.md \
+            _LOGS/SESSION-INTENT/VHE-INTENT-2026-08-01-02_claude-ai_MARCUS-SOREN.md
+          rm -rf .github/marcus-review-payload
+          rm -f .github/workflows/import-marcus-review-001.yml
+
+      - name: Commit reviewed artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Eli Soren'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Import Marcus Soren REVIEW-001 verdict and intent — preserved verbatim'
+          git push origin HEAD:main
