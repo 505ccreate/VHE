@@ -1,110 +1,109 @@
 # CURRENT STATUS — read this first
 
-**Last updated:** 2026-07-31 EDT by `GPT-5-01` / **Eli Soren** (ChatGPT GitHub build lane).
+**Last updated:** 2026-08-01 EDT by `GPT-5-01` / **Eli Soren** (ChatGPT GitHub build lane).
 
 ## Current truth
 
-**GitHub migration: PASS.** The authoritative `VHE-Progress-update 16_2026-07-27.zip` was migrated to
-`505ccreate/VHE` on canonical branch `main`. The one-shot import verified the exact expected ZIP SHA-256,
-extracted exactly **168 files**, verified the package provenance/status/package files, imported the tree,
-and removed its temporary migration inbox/workflow. Import commit:
-`4722bceef89f00be441e62fd4a37058ebe606c9c`.
+**GitHub migration remains PASS.** The authoritative `VHE-Progress-update 16_2026-07-27.zip` was migrated
+to canonical branch `main` at commit `4722bceef89f00be441e62fd4a37058ebe606c9c`. The import verified the
+expected archive SHA-256 and exactly 168 package files, then removed the temporary upload/workflow.
 
-`PACKAGE-PROVENANCE.md` on `main` reports the package's historic build HEAD
-`6d00b541f20f3f46481045182e69f7e865ab1b6b`, clean build-time status, 166 lean tracked files + the two
-provenance/manifest entries = 168, and no credential-bearing `.env` file.
+**Marcus REVIEW-001: REJECTED.** Marcus Soren independently reviewed the Round-14 state at commit
+`f82cd31cf900307a6ea5c8f4c396f558b4aab724`. His original intent and verdict were preserved byte-for-byte
+at import commit `8c7fe32534d87bbb9d0db959f714fcc199f51a85`.
 
-**Removal-lane specification: REJECTED at round 14 with 6 blockers.** Round 14 was appended to
-`VHE-ISSUE-LOG-0033`; the imported round-13 file was verified as the exact byte-prefix before the append.
-Append commit: `9d68b2485890df82aa5db21aded03838617fa8b0`.
+Marcus cleared R14·2 (continuation-key provenance) and R14·4 (budget-refusal state/order), but reproduced
+five blockers involving zombie worker job writes, the Postgres-to-BullMQ execution handoff, direct-ledger
+ordinal collisions across continuations, loss of structured billing on total provider-chain exhaustion,
+and missing regression tests.
 
-**➡ CURRENT GATE — `0032` (base) + `0033` (binding correction + rounds 5–14) are the removal-lane
-specification. STILL NOT BUILD-AUTHORIZED.** Later appends govern on conflict.
+**Round 15 appended.** Eli Soren independently re-read Marcus’s findings against the authoritative
+Round-14 append and shipped `packages/jobs/worker.ts`, `packages/queue/runtime.ts`, and
+`packages/providers/routing.ts`. All five blockers reproduce. Round 15 was then appended to `0033` at
+commit `a08f02d1561b43d76c9a1d23fce0f61be5db3371`.
 
-**➡ NEXT ACTION — independent specification review of the round-14 corrections.** This is still **not**
-a provider probe and **not** removal-lane implementation.
+The append workflow verified the exact Round-14 blob, the Round-15 payload SHA-256, the entire prior file as
+an exact byte-prefix, and exactly **214 appended lines**. No prior body or appendix was rewritten.
+
+## Current gate
+
+**➡ `0032` (base) + `0033` (binding correction + rounds 5–15) remain the removal-lane specification.**
+
+**➡ STILL NOT BUILD-AUTHORIZED.** The next gate is independent
+`_LOGS/AI-REVIEW-JOBS/ACTIVE-REVIEW-002_ROUND-15-REMOVAL-LANE-SPEC.md`.
+
+This is still **not** removal-lane implementation and **not** a provider probe.
+
+## Round-15 corrections now binding
+
+1. **Frozen claim-attempt authority:** every worker-owned `jobs` write—heartbeat, park, success, failure,
+   graceful retry release, and related publication/rollup—must be guarded by the frozen claim-time
+   `jobs.attempt`. A zombie worker that loses authority cannot write state or perform provider side effects.
+2. **Durable execution dispatch:** funded continuations commit a separate Postgres
+   `job_execution_outbox` row. A relay performs BullMQ/Redis delivery only after COMMIT. The existing
+   continuation `job_wakeup_outbox` remains separate; `execute` is not a wake kind.
+3. **Fresh execution attempt per routed continuation:** a funded continuation returns the job to `queued`;
+   the normal §4 claim increments `jobs.attempt` and atomically binds the routing attempt to that execution
+   attempt. Candidate ordinal 0 may safely recur in a later logical continuation because the execution
+   attempt differs.
+4. **Structured billing through exhaustion:** successful fall-through and typed all-candidates-failed
+   `NO_PROVIDER` outcomes both retain a discriminated `ProviderChargeEvent[]`. Known charges are ledgered;
+   accepted/ambiguous unknown charges enter reconciliation and block automatic retry.
+5. **Ten additive tests:** zombie writes and side effects, all execution-outbox crash windows, refusal with
+   no execute delivery, crash/retry continuation-key determinism, fresh-attempt ordinal namespace, atomic
+   claim/bind rollback, exhausted-chain billing survival, charge-event type safety, and lock ordering.
+
+Full binding language and test reconciliation are in the Round-15 append to `0033`.
+
+## AI review queue
+
+- REVIEW-001 is closed as rejected:
+  `_LOGS/AI-REVIEW-JOBS/CLOSED-REVIEW-001_ROUND-14-REMOVAL-LANE-SPEC.md`
+- Marcus’s verdict:
+  `_LOGS/AI-REVIEW-JOBS/VERDICT-REVIEW-001_2026-08-01_MARCUS-SOREN.md`
+- REVIEW-002 is active:
+  `_LOGS/AI-REVIEW-JOBS/ACTIVE-REVIEW-002_ROUND-15-REMOVAL-LANE-SPEC.md`
+
+Eli Soren authored Round 15 and cannot independently clear REVIEW-002. Marcus Soren, Marcus Junior, Eli
+Junior, or another properly identified independent AI may review it.
 
 ## `0034` remains reserved and unexecuted
 
-Round 12 authorized a documented VHE-2 §4.2 amendment, and round 13 correctly deferred execution until the
-removal-lane specification clears review. Round 14 adds requirements that the eventual amendment must
-carry, especially the per-candidate direct-billing transport. Therefore:
+Do not:
 
-- **Do not modify VHE-2 §4.1 or §4.2 yet.**
-- **Do not run `_BLUEPRINTS-TEXT/_regenerate.py` yet.**
-- **Do not implement the removal lane yet.**
-- When the spec is finally accepted, one deliberately scoped `0034` must cover the already-authorized
-  typed §4.2 execution accounting contract together with the §4.1 queue-payload change that belongs to the
-  same contract. Any owner authorization requirement still recorded in prior handoffs remains in force.
+- modify VHE-2 §4.1 or §4.2;
+- run `_BLUEPRINTS-TEXT/_regenerate.py`;
+- implement the removal lane;
+- read provider keys;
+- call provider APIs or run a provider probe;
+- upload provider media or spend money.
 
-## Round-14 blockers now binding
+The already-authorized future `0034` amendment remains deferred until the specification clears independent
+review. Do not claim `0034` for another issue.
 
-1. **Poll ownership:** round 13's reconciler-only lease does not fence the shipped stale-job takeover.
-   Correction: one **attempt-scoped poll lease** shared by job workers and reconcilers, guarded by owner
-   token + generation on every poll/result write; retract the reconciler-only ownership columns on the
-   permanent operation row.
-2. **Follower continuation key:** `original decision key` is undefined on an outbox-driven follower path.
-   Correction: derive the deterministic continuation key from `job_id`,
-   `prior_follower_routing_attempt_id`, and `continuation_generation` only.
-3. **Wake consumption transaction:** `consumed_at` cannot commit after only the resume claim. For follower
-   continuation, one short Postgres transaction must own the wake from claim through the durable next
-   state, with `consumed_at` written last. No network call inside that transaction.
-4. **Budget-refusal routing state/order:** add terminal non-executable `budget_refused`; atomically commit
-   either funded `reserved` + held reservation/binding or refused `budget_refused` + no reservation/no
-   binding + terminal `BUDGET_EXCEEDED` outcome. Deterministic-key losers replay the winner.
-5. **Direct ledger transport:** R13's `(job_id, execution_attempt, provider_attempt_no)` grain cannot be
-   populated by the shipped scalar handler contract. The future `0034` contract must carry per-candidate
-   `ProviderChargeEvent[]` with ordinal, provider connection, submission disposition, charge state, cost,
-   and provider billing identifiers where available. Unknown accepted/ambiguous charges park for
-   reconciliation before retry/fall-through.
-6. **Tests:** eight additive cross-system tests are required for poll races/fencing, continuation-key
-   provenance, crash boundary, budget refusal, multi-candidate billing, unknown-charge retry blocking, and
-   scoped charge-id/direct-row constraints.
-
-The full wording and test contracts are in the round-14 append to `0033`; this file is only the status
-summary.
-
-## Reading order for the next builder/reviewer
+## Reading order
 
 1. `_LOGS/STATUS-HANDOFF/CURRENT-STATUS.md` — this file.
-2. `_LOGS/STATUS-HANDOFF/VHE-HANDOFF-2026-07-31-46_chatgpt-web_GPT-5-01.md` — migration + round-14 handoff.
-3. `_LOGS/ISSUE-RESOLUTION-LOG/VHE-ISSUE-LOG-0033_removal-lane-binding-correction_CC-OPUS-01.md` — body +
-   **rounds 5–14**. Later append wins on conflict.
-4. `_LOGS/ISSUE-RESOLUTION-LOG/VHE-ISSUE-LOG-0032_removal-lane-consolidated-implementation-spec_CC-SONNET-01.md`
-   — base spec.
-5. Shipped seams cited by round 14: `packages/jobs/worker.ts`, `packages/providers/routing.ts`,
-   `packages/queue/runtime.ts`, `packages/queue/queues.ts`, `packages/jobs/create.ts`,
-   `packages/jobs/errors.ts`, `migrations/0001_schema.sql`.
+2. `_LOGS/STATUS-HANDOFF/VHE-HANDOFF-2026-08-01-48_chatgpt_GPT-5-01.md`
+3. `_LOGS/AI-REVIEW-JOBS/README.md`
+4. `_LOGS/AI-REVIEW-JOBS/ACTIVE-REVIEW-002_ROUND-15-REMOVAL-LANE-SPEC.md`
+5. `_LOGS/AI-REVIEW-JOBS/VERDICT-REVIEW-001_2026-08-01_MARCUS-SOREN.md`
+6. `_LOGS/ISSUE-RESOLUTION-LOG/VHE-ISSUE-LOG-0033_removal-lane-binding-correction_CC-OPUS-01.md` —
+   Round 15 tail plus only earlier sections needed to verify references.
+7. `_LOGS/ISSUE-RESOLUTION-LOG/VHE-ISSUE-LOG-0032_removal-lane-consolidated-implementation-spec_CC-SONNET-01.md`
+8. shipped source seams named by REVIEW-002.
 
-## Build state that remains true
+## Verification and explicit non-actions
 
-The imported Update-16 source already contains the work completed before this GitHub lane. Do **not**
-rebuild it from scratch. The existing logs remain the authority for which sections were built and what was
-actually verified. Among the imported history: core Phase-0/repair scaffolding, job lifecycle, masks,
-provider routing, image-repair work, deterministic video-repair/windowing work, and their recorded tests
-exist; the removal-lane under review is a later specification gate, not permission to rewrite those earlier
-lanes.
+This work block changed documentation/logging/specification only. **No tests were run.** Older Vitest and
+preflight counts remain historical measurements from their named commits and must not be reported as fresh.
 
-**No tests were re-run during the 2026-07-31 round-14 work block.** The work was package migration,
-source/spec inspection, and documentation. Any older Vitest/preflight counts remain historical measurements
-from their named commits; do not report them as freshly run.
+No source implementation, test implementation, migration, blueprint, dependency, provider configuration,
+key, provider request, upload, probe, or spend occurred.
 
-## Explicitly NOT done in this block
+## Open administrative item
 
-- No removal-lane source implementation.
-- No VHE-2 blueprint change; `0034` not executed.
-- No provider key read.
-- No fal/provider metadata probe.
-- No provider upload/network call.
-- No spend.
-- No new full backup ZIP/repository yet.
+Marcus Soren’s supplied files use the owner-recognized display signature `MARCUS-SOREN`. His claude.ai
+account still needs an owner-confirmed registry identifier. No identifier was invented during intake.
 
-## Carry-over outside the round-14 spec gate
-
-- The live/provider-validation lane still has its prior authorization requirements and configuration
-  dependencies (including the recorded `S3_REGION`/fixture matters). Do not pull those forward while the
-  current spec gate is rejected.
-- Backup discipline remains: source repo stays clean; full/progress ZIPs belong in the separate backup
-  location/repository once that lane is created.
-
-— **Eli Soren (`GPT-5-01`)**, 2026-07-31
+— **Eli Soren (`GPT-5-01`)**, 2026-08-01.
