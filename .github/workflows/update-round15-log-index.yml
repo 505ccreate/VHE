@@ -1,0 +1,55 @@
+name: Update VHE log index for Round 15
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/round15-bookkeeping/trigger.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update only the existing 0033 index row
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('_LOGS/LOG-INDEX.md')
+          s = p.read_text(encoding='utf-8')
+          old_summary = "**Round-14 correction appended 2026-07-31 (`GPT-5-01`, Eli Soren / ChatGPT GitHub lane): Update-16 GitHub migration PASS; specification REJECTED with 6 blockers — unified attempt-scoped poll lease, durable follower-continuation key, one atomic wake-to-next-state transaction, explicit `budget_refused` routing state/order, per-candidate `ProviderChargeEvent[]` transport for direct-ledger accounting, and 8 additive tests. No source/blueprint/probe/key/network/spend.**"
+          new_summary = old_summary + " **Independent REVIEW-001 (Marcus Soren, 2026-08-01): REJECTED; R14·2 and R14·4 passed, five blockers confirmed. Round-15 correction appended by `GPT-5-01`: frozen claim-attempt fencing for every worker-owned job write, a separate durable execution outbox, one fresh §4 execution attempt per routed continuation, structured charge events preserved through total exhaustion, and 10 additive tests. No source/blueprint/probe/key/network/spend.**"
+          old_status = "**SPEC — binding correction to 0032 + rounds 5–14 appended; REJECTED at round 14 (6 blockers); `0034` remains reserved/unexecuted; STILL NOT build-authorized; NOTHING built/probed**"
+          new_status = "**SPEC — binding correction to 0032 + rounds 5–15 appended; Round 14 independently REJECTED; Round 15 awaiting REVIEW-002; `0034` remains reserved/unexecuted; STILL NOT build-authorized; NOTHING built/probed**"
+          old_tail = "| `CC-OPUS-01` | 2026-07-27 |\n\n**Next available number: 0034**"
+          new_tail = "| `CC-OPUS-01` + `GPT-5-01` | 2026-08-01 |\n\n**Next available number: 0034 (reserved; do not claim while the specification gate remains open)**"
+          for old, new, label in ((old_summary,new_summary,'summary'),(old_status,new_status,'status'),(old_tail,new_tail,'tail')):
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label} replacement count was {count}, expected 1')
+              s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          grep -q 'Round 15 awaiting REVIEW-002' _LOGS/LOG-INDEX.md
+          grep -q 'Next available number: 0034 (reserved' _LOGS/LOG-INDEX.md
+          rm -rf .github/round15-bookkeeping
+          rm -f .github/workflows/update-round15-log-index.yml
+
+      - name: Commit index bookkeeping
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Eli Soren'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Index Marcus REVIEW-001 and Round 15 — Eli Soren'
+          git push origin HEAD:main
